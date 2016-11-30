@@ -46,7 +46,7 @@ public interface HistoryApiResponseHandler extends ManifoldApiResponseHandler {
      *        "pages": integer,
      *        "results": [{
      *            "submitted": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
-     *            "accepted": // TODO: resolve this, currently null,
+     *            "accepted": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
      *            "from": {
      *                "id": String (UUID),
      *                "type": String,
