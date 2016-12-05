@@ -26,11 +26,13 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.assets;
 
+import com.android.volley.Response;
+
+import org.json.JSONObject;
+
 /**
  * Provides the data needed to interact with assets such as Securities, Short-term Loans,
  * Mortgages, and Currencies.
- *
- * Requests are made asynchronously and require a listener for the response object.
  */
 public interface AssetsApi {
 
@@ -38,13 +40,24 @@ public interface AssetsApi {
      * Request all assets for a given role.
      *
      * @param roleId the role ID for the authenticated account
-     */
-    void getAssets(String roleId);
-
-    /**
-     * Get the listener that handles the request response.
+     * @param successListener handles a <code>JSONObject</code> in the following format:
      *
-     * @return
+     * <pre>{@code
+     *
+     *     {
+     *         "results": [{
+     *             "type": String,
+     *             "id": String (UUID),
+     *             "ticker": String,
+     *             "amount": String (decimal),
+     *             "issuer": String (UUID)
+     *         }]
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    AssetsApiResponseHandler getAssetsApiResponseHandler();
+    void getAssets(String roleId, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener);
+
 }

@@ -30,7 +30,7 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.manifoldtechnology.manifold_api_android_client.api.AbstractApi;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 import com.manifoldtechnology.manifold_api_android_client.service.Utilities;
 import com.manifoldtechnology.manifold_api_android_client.service.request.JsonObjectRequestBasicAuth;
@@ -40,19 +40,18 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class LiveTickerApiImpl implements LiveTickerApi {
+/**
+ * Default implementation of the <code>LiveTickerApi</code> using Volley for HTTP requests.
+ */
+public class LiveTickerApiImpl extends AbstractApi implements LiveTickerApi {
 
-    private LiveTickerApiResponseHandler responseHandler;
-    private ManifoldApiConnector connector;
-    private Context context;
-
-    public LiveTickerApiImpl(Context context, LiveTickerApiResponseHandler responseHandler, ManifoldApiConnector connector){
-        this.responseHandler = responseHandler;
-        this.connector = connector;
+    public LiveTickerApiImpl(Context context, ManifoldApiConnector connector){
+        super(context, connector);
     }
 
     @Override
-    public void getLiveTicker(List<String> tickers){
+    public void getLiveTicker(List<String> tickers, Response.Listener<JSONObject> successListener,
+                              Response.ErrorListener errorListener){
 
         StringBuilder sb = new StringBuilder();
         for (String ticker : tickers) {
@@ -62,32 +61,17 @@ public class LiveTickerApiImpl implements LiveTickerApi {
             sb.delete(sb.length() - 1, sb.length());
         }
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath("stocks")
                 .appendPath("NASDAQ")
                 .appendQueryParameter("symbols", sb.toString())
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
-                connector.getUsername(), connector.getPassword(), null, JsonObjectRequestBasicAuth.Type.JSON_ARRAY,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        responseHandler.handleLiveTickerResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
+                getConnector().getUsername(), getConnector().getPassword(), null,
+                JsonObjectRequestBasicAuth.Type.JSON_ARRAY, successListener, errorListener);
 
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
-    @Override
-    public LiveTickerApiResponseHandler getLiveTickerApiResponseHandler() {
-        return responseHandler;
-    }
 }

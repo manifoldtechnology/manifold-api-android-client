@@ -26,6 +26,10 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.trends;
 
+import com.android.volley.Response;
+
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -37,28 +41,122 @@ public interface TrendsApi {
      * Request the current interest rates for bids and asks for specified assets.
      *
      * @param assetTypes a <code>List</code> of asset categories.
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "averageValueToMaturity": {
+     *             "30": integer,
+     *             "60": integer,
+     *             "90": integer,
+     *             "120": integer
+     *         },
+     *         "transactions": {
+     *             "total": integer,
+     *             "pages": integer,
+     *             "results": [{
+     *                 "transferDate": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
+     *                 "cost": String (float)
+     *             }]
+     *         },
+     *         "bids": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }],
+     *         "asks": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }]
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    void getInterestRates(List<String> assetTypes);
+    void getInterestRates(List<String> assetTypes, Response.Listener<JSONObject> successListener,
+                          Response.ErrorListener errorListener);
 
     /**
      * Request the current market volume for specified assets.
      *
      * @param assetTypes a <code>List</code> of asset categories.
      * @param duration the length of time in milliseconds to retrieve in the past starting from the present time
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "averageValueToMaturity": {
+     *             "30": integer,
+     *             "60": integer,
+     *             "90": integer,
+     *             "120": integer
+     *         },
+     *         "transactions": {
+     *             "total": integer,
+     *             "pages": integer,
+     *             "results": [{
+     *                 "transferDate": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
+     *                 "cost": String (float)
+     *             }]
+     *         },
+     *         "bids": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }],
+     *         "asks": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }]
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    void getMarketVolume(List<String> assetTypes, long duration);
+    void getMarketVolume(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener,
+                         Response.ErrorListener errorListener);
 
     /**
      * Request the current market value for specified assets.
      *
      * @param assetTypes a <code>List</code> of asset categories.
      * @param duration the length of time in milliseconds to retrieve in the past starting from the present time
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "averageValueToMaturity": {
+     *             "30": integer,
+     *             "60": integer,
+     *             "90": integer,
+     *             "120": integer
+     *         },
+     *         "transactions": {
+     *             "total": integer,
+     *             "pages": integer,
+     *             "results": [{
+     *                 "transferDate": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
+     *                 "cost": String (float)
+     *             }]
+     *         },
+     *         "bids": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }],
+     *         "asks": [{
+     *             "rate": decimal,
+     *             "time": long (ms since epoch)
+     *         }]
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    void getMarketValue(List<String> assetTypes, long duration);
+    void getMarketValue(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener,
+                        Response.ErrorListener errorListener);
 
-    /**
-     * Get the listener that handles the request response.
-     * @return
-     */
-    TrendsApiResponseHandler getTrendsApiResponseHandler();
 }

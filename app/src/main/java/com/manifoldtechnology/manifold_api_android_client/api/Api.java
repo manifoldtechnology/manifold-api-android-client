@@ -24,41 +24,15 @@
  * SOFTWARE.
  */
 
-package com.manifoldtechnology.manifold_api_android_client;
+package com.manifoldtechnology.manifold_api_android_client.api;
 
-import android.support.test.runner.AndroidJUnit4;
+import android.content.Context;
 
-import com.android.volley.ServerError;
+import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 
-import org.json.JSONException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+public interface Api {
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+    Context getContext();
 
-import static junit.framework.Assert.assertTrue;
-
-@RunWith(AndroidJUnit4.class)
-public class UserApiTest extends ApiTest {
-
-    private boolean exceptionEncountered = false;
-
-    @Test
-    public void testCreateAccountThatAlreadyExists() throws InterruptedException, ExecutionException, TimeoutException,
-            ServerError, JSONException {
-
-        createUser();
-
-        assertTrue(exceptionEncountered);
-    }
-
-    @Override
-    public void handleException(Exception e) {
-        assertTrue(e.getMessage().matches(".+A role with name.*already exists.*"));
-
-        getAsyncTestSuccessful().set(true);
-        getAsyncResponseReceived().set(true);
-        exceptionEncountered = true;
-    }
+    ManifoldApiConnector getConnector();
 }

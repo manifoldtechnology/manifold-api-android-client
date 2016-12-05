@@ -30,7 +30,7 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.manifoldtechnology.manifold_api_android_client.api.AbstractApi;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 import com.manifoldtechnology.manifold_api_android_client.service.Utilities;
 import com.manifoldtechnology.manifold_api_android_client.service.request.JsonObjectRequestBasicAuth;
@@ -38,48 +38,27 @@ import com.manifoldtechnology.manifold_api_android_client.service.request.Reques
 
 import org.json.JSONObject;
 
-public class AssetsApiImpl implements AssetsApi {
+/**
+ * Default implementation of the <code>AssetsApi</code> using Volley for HTTP requests.
+ */
+public class AssetsApiImpl extends AbstractApi implements AssetsApi {
 
-    private AssetsApiResponseHandler responseHandler;
-    private ManifoldApiConnector connector;
-    private Context context;
-
-    public AssetsApiImpl(Context context, AssetsApiResponseHandler responseHandler, ManifoldApiConnector connector){
-        this.context = context;
-        this.responseHandler = responseHandler;
-        this.connector = connector;
+    public AssetsApiImpl(Context context, ManifoldApiConnector connector){
+        super(context, connector);
     }
 
     @Override
-    public void getAssets(String roleId) {
+    public void getAssets(String roleId, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) {
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath(roleId)
                 .appendPath("assets")
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
-                connector.getUsername(), connector.getPassword(), null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        responseHandler.handleAssetsResponse(response);
-                    }
+                getConnector().getUsername(), getConnector().getPassword(), null,
+                JsonObjectRequestBasicAuth.Type.JSON_OBJECT, successListener, errorListener);
 
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
-
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
-
-    @Override
-    public AssetsApiResponseHandler getAssetsApiResponseHandler(){
-        return responseHandler;
-    }
-
 }

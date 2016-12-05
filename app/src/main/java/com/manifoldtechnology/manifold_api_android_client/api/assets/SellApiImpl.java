@@ -30,7 +30,7 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.manifoldtechnology.manifold_api_android_client.api.AbstractApi;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 import com.manifoldtechnology.manifold_api_android_client.service.Utilities;
 import com.manifoldtechnology.manifold_api_android_client.service.request.JsonObjectRequestBasicAuth;
@@ -41,76 +41,52 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
-public class SellApiImpl implements SellApi {
+/**
+ * Default implementation of the <code>SellApi</code> using Volley for HTTP requests.
+ */
+public class SellApiImpl extends AbstractApi implements SellApi {
 
-    private SellApiResponseHandler responseHandler;
-    private ManifoldApiConnector connector;
-    private Context context;
-
-    public SellApiImpl(Context context, SellApiResponseHandler responseHandler, ManifoldApiConnector connector){
-        this.context = context;
-        this.responseHandler = responseHandler;
-        this.connector = connector;
+    public SellApiImpl(Context context, ManifoldApiConnector connector){
+        super(context, connector);
     }
 
     @Override
-    public void sell(String bidType, float bidRate, long futureValue, int daysToMaturity, float par, String ticker) {
+    public void sell(String bidType, float bidRate, long futureValue, int daysToMaturity, float par, String ticker,
+                     Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) throws JSONException {
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath("Broker")
                 .appendPath("request")
                 .build().toString();
 
-        try {
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("metadata", new JSONObject());
-            requestBody.put("type", bidType);
-            requestBody.put("ticker", ticker);
-            requestBody.put("amount", 1);
-            requestBody.put("issuer", connector.getUsername());
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("metadata", new JSONObject());
+        requestBody.put("type", bidType);
+        requestBody.put("ticker", ticker);
+        requestBody.put("amount", 1);
+        requestBody.put("issuer", getConnector().getUsername());
 
-            requestBody.getJSONObject("metadata").put("futureValue", futureValue);
+        requestBody.getJSONObject("metadata").put("futureValue", futureValue);
 
-            long discount = 0;
+        long discount = 0;
 
-            if (bidType.equals("Security")) {
-                discount = (long) (futureValue * (bidRate / 100) * (daysToMaturity / 360));
-                requestBody.getJSONObject("metadata").put("par", par);
-            } else if (bidType.equals("Short-term Loans") || bidType.equals("CDO") || bidType.equals("Mortgage")) {
-                discount = (long)(futureValue * bidRate);
-            }
-
-            requestBody.getJSONObject("metadata").put("discount", discount);
-            requestBody.getJSONObject("metadata").put("cost", futureValue - discount);
-            requestBody.getJSONObject("metadata").put("discountRate", bidRate);
-            requestBody.getJSONObject("metadata").put("daysToMaturity", daysToMaturity);
-            requestBody.getJSONObject("metadata").put("requestDate", new Date().getTime());
-
-            JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.POST, url,
-                    connector.getUsername(), connector.getPassword(), requestBody, JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            responseHandler.handleSellResponse(response);
-                        }
-
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                        }
-                    }
-            );
-
-            RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
+        if (bidType.equals("Security")) {
+            discount = (long) (futureValue * (bidRate / 100) * (daysToMaturity / 360));
+            requestBody.getJSONObject("metadata").put("par", par);
+        } else if (bidType.equals("Short-term Loans") || bidType.equals("CDO") || bidType.equals("Mortgage")) {
+            discount = (long) (futureValue * bidRate);
         }
-        catch (JSONException e) {
-            responseHandler.handleException(e);
-        }
-    }
 
-    @Override
-    public SellApiResponseHandler getSellApiResponseHandler() {
-        return responseHandler;
+        requestBody.getJSONObject("metadata").put("discount", discount);
+        requestBody.getJSONObject("metadata").put("cost", futureValue - discount);
+        requestBody.getJSONObject("metadata").put("discountRate", bidRate);
+        requestBody.getJSONObject("metadata").put("daysToMaturity", daysToMaturity);
+        requestBody.getJSONObject("metadata").put("requestDate", new Date().getTime());
+
+        JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.POST, url,
+                getConnector().getUsername(), getConnector().getPassword(), requestBody,
+                JsonObjectRequestBasicAuth.Type.JSON_OBJECT, successListener, errorListener);
+
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 }

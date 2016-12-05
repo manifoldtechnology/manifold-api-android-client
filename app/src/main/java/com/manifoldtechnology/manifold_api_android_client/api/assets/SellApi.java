@@ -26,6 +26,11 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.assets;
 
+import com.android.volley.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Provides the ability to sell assets.
  */
@@ -40,13 +45,33 @@ public interface SellApi {
      * @param daysToMaturity the number of days until the asset has matured
      * @param par the face value of a bond (or other asset)
      * @param ticker a label or abbreviation for the asset
-     */
-    void sell(String bidType, float bidRate, long futureValue, int daysToMaturity, float par, String ticker);
-
-    /**
-     * Get the listener that handles the request response.
+     * @param successListener handles a <code>JSONObject</code> in the following format:
      *
-     * @return
+     * <pre>{@code
+     *     {
+     *         "asset": {
+     *             "id": String (UUID),
+     *             "type": String,
+     *             "ticker": String
+     *             "amount": Integer,
+     *             "issuer": String,
+     *             "metadata": {
+     *                 "par": String (integer),
+     *                 "discountRate": String (decimal),
+     *                 "cost": String (integer),
+     *                 "daysToMaturity": String (integer),
+     *                 "requestDate": String (long ms since epoch),
+     *                 "futureValue": String (integer)
+     *             }
+     *         },
+     *         "holder": String,
+     *         "approved": boolean,
+     *     }
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    SellApiResponseHandler getSellApiResponseHandler();
+    void sell(String bidType, float bidRate, long futureValue, int daysToMaturity, float par, String ticker,
+              Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) throws JSONException;
+
 }

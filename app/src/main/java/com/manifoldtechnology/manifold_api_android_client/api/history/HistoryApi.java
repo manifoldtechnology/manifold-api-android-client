@@ -26,6 +26,10 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.history;
 
+import com.android.volley.Response;
+
+import org.json.JSONObject;
+
 import java.util.Date;
 
 /**
@@ -39,16 +43,58 @@ public interface HistoryApi {
      * @param brokerName the name of the broker, typically "Broker"
      * @param typeFilter the label of the asset
      * @param begin the date of the beginning of the request window; chronologically older than <code>end</code>
-     * @param end the date of the beginning of the request window; chronologically younger than <code>begin</code>
+     * @param end the date of the end of the request window; chronologically younger than <code>begin</code>
      * @param page the page desired for pagination beginning at page 1
      * @param size the number of elements to return per page
-     */
-    void getHistory(String brokerName, String typeFilter, Date begin, Date end, int page, int size);
-
-    /**
-     * Get the listener that handles the request response.
+     * @param successListener handles a <code>JSONObject</code> in the following format:
      *
-     * @return
+     * <pre>{@code
+     *
+     *    {
+     *        "total": integer,
+     *        "pages": integer,
+     *        "results": [{
+     *            "submitted": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
+     *            "accepted": String (date string, format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'),
+     *            "from": {
+     *                "id": String (UUID),
+     *                "type": String,
+     *                "name": String,
+     *                "entityId": String (UUID),
+     *                "accountId": String (UUID),
+     *                "userId": String (UUID)
+     *            },
+     *            "to": {
+     *                "id": String (UUID),
+     *                "type": String,
+     *                "name": String,
+     *                "entityId": String (UUID),
+     *                "accountId": String (UUID),
+     *                "userId": String (UUID)
+     *            },
+     *            "asset": {
+     *                "id": String (UUID),
+     *                "type": String,
+     *                "ticker": String,
+     *                "amount": integer,
+     *                "issuer": String,
+     *                "metadata": {
+     *                    "par": String (integer),
+     *                    "discountRate": String (decimal),
+     *                    "cost": String (integer),
+     *                    "daysToMaturity": String (integer),
+     *                    "requestDate": String (long ms since epoch),
+     *                    "futureValue": String (integer)
+     *                }
+     *            }
+     *        }]
+     *    }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    HistoryApiResponseHandler getHistoryApiResponseHandler();
+    void getHistory(String brokerName, String typeFilter, Date begin, Date end, int page, int size,
+                    Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener);
+
 }

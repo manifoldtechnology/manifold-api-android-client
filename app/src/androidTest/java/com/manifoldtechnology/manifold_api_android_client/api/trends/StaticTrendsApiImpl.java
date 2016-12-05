@@ -28,6 +28,7 @@ package com.manifoldtechnology.manifold_api_android_client.api.trends;
 
 import android.content.Context;
 
+import com.android.volley.Response;
 import com.manifoldtechnology.manifold_api_android_client.R;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 
@@ -44,15 +45,13 @@ import java.util.TimeZone;
 
 public class StaticTrendsApiImpl implements TrendsApi {
 
-    private TrendsApiResponseHandler responseHandler;
     private ManifoldApiConnector connector;
     private Context context;
     private Random random = new Random();
     private DateFormat dateFormat;
 
-    public StaticTrendsApiImpl(Context context, TrendsApiResponseHandler responseHandler, ManifoldApiConnector connector){
+    public StaticTrendsApiImpl(Context context, ManifoldApiConnector connector){
         this.context = context;
-        this.responseHandler = responseHandler;
         this.connector = connector;
 
         dateFormat = new SimpleDateFormat(context.getString(R.string.full_timestamp_format));
@@ -60,23 +59,21 @@ public class StaticTrendsApiImpl implements TrendsApi {
     }
 
     @Override
-    public void getInterestRates(List<String> assetTypes) {
-        responseHandler.handleInterestRatesResponse(getTrendsJsonObject());
+    public void getInterestRates(List<String> assetTypes, Response.Listener<JSONObject> successListener,
+                                 Response.ErrorListener errorListener) {
+        successListener.onResponse(getTrendsJsonObject());
     }
 
     @Override
-    public void getMarketVolume(List<String> assetTypes, long duration) {
-        responseHandler.handleMarketVolumeResponse(getTrendsJsonObject());
+    public void getMarketVolume(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener,
+                                Response.ErrorListener errorListener) {
+        successListener.onResponse(getTrendsJsonObject());
     }
 
     @Override
-    public void getMarketValue(List<String> assetTypes, long duration) {
-        responseHandler.handleMarketValueResponse(getTrendsJsonObject());
-    }
-
-    @Override
-    public TrendsApiResponseHandler getTrendsApiResponseHandler() {
-        return responseHandler;
+    public void getMarketValue(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener,
+                               Response.ErrorListener errorListener) {
+        successListener.onResponse(getTrendsJsonObject());
     }
 
     private JSONObject getTrendsJsonObject(){
@@ -131,7 +128,7 @@ public class StaticTrendsApiImpl implements TrendsApi {
             }
 
         } catch (JSONException e) {
-            responseHandler.handleException(e);
+            e.printStackTrace();
         }
 
         return jsonObject;

@@ -24,17 +24,24 @@
  * SOFTWARE.
  */
 
-package com.manifoldtechnology.manifold_api_android_client.api;
+package com.manifoldtechnology.manifold_api_android_client;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
- * Provides a handler for generic Manifold Technology API requests.
+ * An empty class used to group the <code>SuiteClasses</code>.
  */
-public interface ManifoldApiResponseHandler {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+        AssetsApiTest.class,
+        BlockchainApiTest.class,
+        EventsApiTest.class,
+        HistoryApiTest.class,
+        LiveTickerApiTest.class,
+        SellApiTest.class,
+        TrendsApiTest.class
+})
+public class ApiTestSuite {
 
-    /**
-     * Handles an exception that occurs in a service layer and presents it to the view layer.
-     *
-     * @param e the <code>Exception</code>
-     */
-    void handleException(Exception e);
 }

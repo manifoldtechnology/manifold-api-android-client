@@ -29,42 +29,86 @@ package com.manifoldtechnology.manifold_api_android_client;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import com.android.volley.Response;
 import com.manifoldtechnology.manifold_api_android_client.api.history.HistoryApi;
 import com.manifoldtechnology.manifold_api_android_client.api.history.HistoryApiImpl;
-import com.manifoldtechnology.manifold_api_android_client.api.history.HistoryApiResponseHandler;
+import com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.defaultErrorListener;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncResponseReceived;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncTestSuccessful;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getContext;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getManifoldApiConnector;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.handleException;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.waitForAsyncResponse;
+import static junit.framework.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
-public class HistoryApiTest extends ApiTest implements HistoryApiResponseHandler {
+public class HistoryApiTest {
+
+    @ClassRule
+    public static SignUpTestRule apiTestRule = new SignUpTestRule();
 
     private HistoryApi historyApi;
     private DateFormat sdf = new SimpleDateFormat("yyyyMMdd.HHmmss.SSS");
 
     @Before
     public void beforeTest(){
-        historyApi = new HistoryApiImpl(getContext(), this, getManifoldApiConnector());
+        historyApi = new HistoryApiImpl(getContext(), getManifoldApiConnector());
     }
 
     @Test
     public void testGetHistory() throws InterruptedException {
         Date now = new Date();
-        historyApi.getHistory("Broker", "Security", new Date(now.getTime() - (86400 * 2 * 1000)), now, 1, 50);
+        historyApi.getHistory("Broker", "Security", new Date(now.getTime() - (86400 * 2 * 1000)), now, 1, 50,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("response", "getHistory: " + response.toString());
+
+                        try {
+                            for (String attribute : Arrays.asList("total", "pages", "results")) {
+                                assertTrue(response.has(attribute));
+                            }
+
+                            if (response.getJSONArray("results").length() > 0) {
+                                for(String attribute : Arrays.asList("submitted", "accepted", "from", "to", "asset")){
+                                    assertTrue(response.getJSONArray("results").getJSONObject(0).has(attribute));
+                                }
+                            }
+
+                            JSONObject objectZero = response.getJSONArray("results").getJSONObject(0);
+
+                            for(String attribute : Arrays.asList("id", "type", "name", "entityId", "accountId", "userId")){
+                                if(!objectZero.isNull("to")) {
+                                    assertTrue(objectZero.getJSONObject("to").has(attribute));
+                                }
+                                assertTrue(objectZero.getJSONObject("from").has(attribute));
+                            }
+
+                            for(String attribute : Arrays.asList("id", "type", "ticker", "amount", "issuer", "metadata")){
+                                assertTrue(objectZero.getJSONObject("asset").has(attribute));
+                            }
+
+                            getAsyncTestSuccessful().set(true);
+                        } catch (JSONException e) {
+                            handleException(e);
+                        }
+                        getAsyncResponseReceived().set(true);
+                    }
+                }, defaultErrorListener());
         waitForAsyncResponse();
-    }
-
-    @Override
-    public void handleHistoryResponse(JSONObject response) {
-        Log.d("handleHistoryResponse", response.toString());
-
-        getAsyncTestSuccessful().set(true);
-        getAsyncResponseReceived().set(true);
     }
 }

@@ -30,8 +30,8 @@ import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.manifoldtechnology.manifold_api_android_client.R;
+import com.manifoldtechnology.manifold_api_android_client.api.AbstractApi;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 import com.manifoldtechnology.manifold_api_android_client.service.Utilities;
 import com.manifoldtechnology.manifold_api_android_client.service.request.JsonObjectRequestBasicAuth;
@@ -44,25 +44,23 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class HistoryApiImpl implements HistoryApi {
+/**
+ * Default implementation of the <code>HistoryApi</code> using Volley for HTTP requests.
+ */
+public class HistoryApiImpl extends AbstractApi implements HistoryApi {
 
-    private Context context;
-    private HistoryApiResponseHandler responseHandler;
-    private ManifoldApiConnector connector;
-
-    public HistoryApiImpl(Context context, HistoryApiResponseHandler responseHandler, ManifoldApiConnector connector){
-        this.context = context;
-        this.responseHandler = responseHandler;
-        this.connector = connector;
+    public HistoryApiImpl(Context context, ManifoldApiConnector connector){
+        super(context, connector);
     }
 
     @Override
-    public void getHistory(String brokerName, String typeFilter, Date begin, Date end, int page, int size){
+    public void getHistory(String brokerName, String typeFilter, Date begin, Date end, int page, int size,
+                           Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener){
 
-        DateFormat dateFormat = new SimpleDateFormat(context.getString(R.string.full_timestamp_format));
-        dateFormat.setTimeZone(TimeZone.getTimeZone(context.getString(R.string.timezone)));
+        DateFormat dateFormat = new SimpleDateFormat(getContext().getString(R.string.full_timestamp_format));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(getContext().getString(R.string.timezone)));
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath(brokerName)
                 .appendPath("history")
                 .appendQueryParameter("assetType", typeFilter)
@@ -73,29 +71,9 @@ public class HistoryApiImpl implements HistoryApi {
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
-                connector.getUsername(), connector.getPassword(), null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            responseHandler.handleHistoryResponse(response);
-                        } catch (Exception e) {
-                            responseHandler.handleException(e);
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
+                getConnector().getUsername(), getConnector().getPassword(), null,
+                JsonObjectRequestBasicAuth.Type.JSON_OBJECT, successListener, errorListener);
 
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
-    }
-
-    @Override
-    public HistoryApiResponseHandler getHistoryApiResponseHandler() {
-        return responseHandler;
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 }

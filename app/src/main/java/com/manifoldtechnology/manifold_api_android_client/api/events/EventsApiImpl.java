@@ -24,9 +24,10 @@
  * SOFTWARE.
  */
 
-package com.manifoldtechnology.manifold_api_android_client.api.trends;
+package com.manifoldtechnology.manifold_api_android_client.api.events;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -42,26 +43,38 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 /**
- * Default implementation of the <code>TrendsApi</code> using Volley for HTTP requests.
+ * Default implementation of the <code>EventsApi</code> using Volley for HTTP requests.
  */
-public class TrendsApiImpl extends AbstractApi implements TrendsApi {
+public class EventsApiImpl extends AbstractApi implements EventsApi {
 
-    public TrendsApiImpl(Context context, ManifoldApiConnector connector){
+    public EventsApiImpl(Context context, ManifoldApiConnector connector){
         super(context, connector);
     }
 
     @Override
-    public void getInterestRates(List<String> assetTypes, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener){
+    public void getEventTypes(Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) {
+        String url = Utilities.getUrlRoot(getConnector())
+                .appendPath("eventtypes")
+                .build().toString();
+
+        JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
+                getConnector().getUsername(), getConnector().getPassword(), null,
+                JsonObjectRequestBasicAuth.Type.JSON_ARRAY, successListener, errorListener);
+
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
+    }
+
+    @Override
+    public void getEventSummary(String ownerId, String eventId, Response.Listener<JSONObject> successListener,
+                                Response.ErrorListener errorListener) {
 
         String url = Utilities.getUrlRoot(getConnector())
-                .appendPath("Broker")
-                .appendPath("stats")
-                // TODO: This really should be all of the asset types but they aren't available yet
-                .appendQueryParameter("assetType", "Security")
+                .appendPath(ownerId)
+                .appendPath("event")
+                .appendPath(eventId)
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
@@ -72,21 +85,12 @@ public class TrendsApiImpl extends AbstractApi implements TrendsApi {
     }
 
     @Override
-    public void getMarketVolume(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener){
-
-        DateFormat dateFormat = new SimpleDateFormat(getContext().getString(R.string.full_timestamp_format));
-        dateFormat.setTimeZone(TimeZone.getTimeZone(getContext().getString(R.string.timezone)));
-
-        String endTime = dateFormat.format(new Date());
-        String startTime = dateFormat.format(new Date(new Date().getTime() - duration));
+    public void getAllEventsByOwner(String ownerId, Response.Listener<JSONObject> successListener,
+                                    Response.ErrorListener errorListener) {
 
         String url = Utilities.getUrlRoot(getConnector())
-                .appendPath("Broker")
-                .appendPath("stats")
-                // TODO: This really should be all of the asset types but they aren't available yet
-                .appendQueryParameter("assetType", "Security")
-                .appendQueryParameter("startTime", startTime)
-                .appendQueryParameter("endTime", endTime)
+                .appendPath(ownerId)
+                .appendPath("events")
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
@@ -97,21 +101,42 @@ public class TrendsApiImpl extends AbstractApi implements TrendsApi {
     }
 
     @Override
-    public void getMarketValue(List<String> assetTypes, long duration, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener){
+    public void submitEventRequest(String ownerId, JSONObject body, Response.Listener<JSONObject> successListener,
+                                   Response.ErrorListener errorListener) {
+
+        String url = Utilities.getUrlRoot(getConnector())
+                .appendPath(ownerId)
+                .appendPath("events")
+                .build().toString();
+
+        JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.POST, url,
+                getConnector().getUsername(), getConnector().getPassword(), body,
+                JsonObjectRequestBasicAuth.Type.STRING, successListener, errorListener);
+
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
+    }
+
+    @Override
+    public void getAllEventsByObjectId(String ownerId, String objectId, String type, Date begin, Date end,
+                                       int page, int size, Response.Listener<JSONObject> successListener,
+                                       Response.ErrorListener errorListener) {
 
         DateFormat dateFormat = new SimpleDateFormat(getContext().getString(R.string.full_timestamp_format));
         dateFormat.setTimeZone(TimeZone.getTimeZone(getContext().getString(R.string.timezone)));
 
-        String endTime = dateFormat.format(new Date());
-        String startTime = dateFormat.format(new Date(new Date().getTime() - duration));
+        Uri.Builder builder = Utilities.getUrlRoot(getConnector())
+                .appendPath(ownerId)
+                .appendPath("events")
+                .appendPath(objectId);
 
-        String url = Utilities.getUrlRoot(getConnector())
-                .appendPath("Broker")
-                .appendPath("stats")
-                // TODO: This really should be all of the asset types but they aren't available yet
-                .appendQueryParameter("assetType", "Security")
-                .appendQueryParameter("startTime", startTime)
-                .appendQueryParameter("endTime", endTime)
+        if(type != null) {
+            builder.appendQueryParameter("type", type);
+        }
+
+        String url = builder.appendQueryParameter("startTime", dateFormat.format(begin))
+                .appendQueryParameter("endTime", dateFormat.format(end))
+                .appendQueryParameter("page", Integer.toString(page))
+                .appendQueryParameter("size", Integer.toString(size))
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,

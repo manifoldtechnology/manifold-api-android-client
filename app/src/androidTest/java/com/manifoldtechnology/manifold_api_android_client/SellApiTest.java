@@ -29,36 +29,65 @@ package com.manifoldtechnology.manifold_api_android_client;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import com.android.volley.Response;
 import com.manifoldtechnology.manifold_api_android_client.api.assets.SellApi;
 import com.manifoldtechnology.manifold_api_android_client.api.assets.SellApiImpl;
-import com.manifoldtechnology.manifold_api_android_client.api.assets.SellApiResponseHandler;
+import com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.defaultErrorListener;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncResponseReceived;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncTestSuccessful;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getContext;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getManifoldApiConnector;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.handleException;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.waitForAsyncResponse;
+import static junit.framework.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
-public class SellApiTest extends ApiTest implements SellApiResponseHandler {
+public class SellApiTest {
+
+    @ClassRule
+    public static SignUpTestRule apiTestRule = new SignUpTestRule();
 
     private SellApi sellApi;
 
     @Before
     public void beforeTest(){
-        sellApi = new SellApiImpl(getContext(), this, getManifoldApiConnector());
+        sellApi = new SellApiImpl(getContext(), getManifoldApiConnector());
     }
 
     @Test
-    public void testSell() throws InterruptedException {
-        sellApi.sell("Security", 8.24f, 30000L, 30, 1000, "USD");
+    public void testSell() throws InterruptedException, JSONException {
+        sellApi.sell("Security", 8.24f, 30000L, 30, 1000, "USD", new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("response", "sell: " + response.toString());
+
+                try {
+                    assertTrue(response.has("asset"));
+                    for (String attribute : Arrays.asList("id", "type", "ticker", "amount", "issuer", "metadata")) {
+                        assertTrue(response.getJSONObject("asset").has(attribute));
+                    }
+
+                    for(String attribute : Arrays.asList("par", "discountRate", "cost", "daysToMaturity", "requestDate", "futureValue")){
+                        assertTrue(response.getJSONObject("asset").getJSONObject("metadata").has(attribute));
+                    }
+                    getAsyncTestSuccessful().set(true);
+                    getAsyncResponseReceived().set(true);
+                } catch (JSONException e) {
+                    handleException(e);
+                }
+            }
+        }, defaultErrorListener());
         waitForAsyncResponse();
-    }
-
-    @Override
-    public void handleSellResponse(JSONObject response) {
-        Log.d("handleSellResponse", response.toString());
-
-        getAsyncTestSuccessful().set(true);
-        getAsyncResponseReceived().set(true);
     }
 }

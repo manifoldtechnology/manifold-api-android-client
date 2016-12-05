@@ -26,6 +26,10 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.ticker;
 
+import com.android.volley.Response;
+
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -37,13 +41,23 @@ public interface LiveTickerApi {
      * Request live ticker values.
      *
      * @param tickers a <code>List</code> of asset tickers
-     */
-    void getLiveTicker(List<String> tickers);
-
-    /**
-     * Get the listener that handles the request response.
+     * @param successListener handles a <code>JSONObject</code> in the following format:
      *
-     * @return
+     * <pre>{@code
+     *
+     *     {
+     *         "array": [{
+     *             "symbol": String,
+     *             "price": String (decimal),
+     *             "change": String (decimal)
+     *         }]
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      */
-    LiveTickerApiResponseHandler getLiveTickerApiResponseHandler();
+    void getLiveTicker(List<String> tickers, Response.Listener<JSONObject> successListener,
+                       Response.ErrorListener errorListener);
+
 }

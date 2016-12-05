@@ -53,7 +53,7 @@ public class JsonObjectRequestBasicAuth extends JsonObjectRequest{
      * <code>JSONArray</code> to be wrapped inside a <code>JSONObject</code>.
      */
     public enum Type{
-        JSON_OBJECT, JSON_ARRAY;
+        JSON_OBJECT, JSON_ARRAY, STRING;
     }
 
     private String username;
@@ -81,6 +81,9 @@ public class JsonObjectRequestBasicAuth extends JsonObjectRequest{
 
                 if(type == Type.JSON_ARRAY){
                     jsonObject.put("array", new JSONArray(data));
+                }
+                else if(type == Type.STRING){
+                    jsonObject.put("result", data.replaceAll("^\"|\"$", ""));
                 }
                 else {
                     jsonObject = new JSONObject(data);

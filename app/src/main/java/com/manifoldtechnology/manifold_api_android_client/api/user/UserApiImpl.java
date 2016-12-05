@@ -31,7 +31,7 @@ import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.ServerError;
-import com.android.volley.VolleyError;
+import com.manifoldtechnology.manifold_api_android_client.api.AbstractApi;
 import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 import com.manifoldtechnology.manifold_api_android_client.domain.Role;
 import com.manifoldtechnology.manifold_api_android_client.service.Utilities;
@@ -45,25 +45,22 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-public class UserApiImpl implements UserApi {
+/**
+ * Default implementation of the <code>UserApi</code> using Volley for HTTP requests.
+ */
+public class UserApiImpl extends AbstractApi implements UserApi {
 
-    private Context context;
-    private ManifoldApiConnector connector;
-    private UserApiResponseHandler responseHandler;
-
-    public UserApiImpl(Context context, ManifoldApiConnector connector, UserApiResponseHandler responseHandler){
-
-        this.connector = connector;
-        this.context = context;
-        this.responseHandler = responseHandler;
+    public UserApiImpl(Context context, ManifoldApiConnector connector){
+        super(context, connector);
     }
 
     @Override
     public void signUp(Role role, String firstName, String lastName, String email, String organization,
-                       String password, String phone, boolean eulaAccepted)
+                       String password, String phone, boolean eulaAccepted,
+                       Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException, ServerError {
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath("roles")
                 .appendPath("signup")
                 .build().toString();
@@ -82,77 +79,38 @@ public class UserApiImpl implements UserApi {
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.POST, url,
                 null, null, new JSONObject(params), JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        responseHandler.handleSignUpResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
+                successListener, errorListener);
 
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
     @Override
-    public void requestProfile(String username, String password)
+    public void requestProfile(String username, String password, Response.Listener<JSONObject> successListener,
+                               Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException {
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath("profile")
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
-                username, password, null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        responseHandler.handleRequestProfileResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
+                username, password, null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT, successListener, errorListener);
 
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
     @Override
-    public void requestRole(String username, String password)
+    public void requestRole(String username, String password, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException {
 
-        String url = Utilities.getUrlRoot(connector)
+        String url = Utilities.getUrlRoot(getConnector())
                 .appendPath("role")
                 .build().toString();
 
         JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.GET, url,
-                username, password, null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        responseHandler.handleRequestRoleResponse(response);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        responseHandler.handleException(new Exception(Utilities.unpackVolleyError(error, context), error));
-                    }
-                }
-        );
+                username, password, null, JsonObjectRequestBasicAuth.Type.JSON_OBJECT, successListener, errorListener);
 
-        RequestQueueSingleton.getInstance(context).addToRequestQueue(request);
-    }
-
-    @Override
-    public UserApiResponseHandler getUserApiResponseHandler() {
-        return responseHandler;
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
 }

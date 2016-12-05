@@ -26,8 +26,11 @@
 
 package com.manifoldtechnology.manifold_api_android_client.api.user;
 
+import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.manifoldtechnology.manifold_api_android_client.domain.Role;
+
+import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -48,13 +51,30 @@ public interface UserApi {
      * @param password the user's password
      * @param phone the user's phone number
      * @param eulaAccepted has the user accepted the license agreement?
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "id": String (UUID),
+     *         "type": String,
+     *         "name": String,
+     *         "entityId": String (UUID),
+     *         "accountId": String (UUID),
+     *         "userId": String (UUID)
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      * @throws InterruptedException
      * @throws ExecutionException
      * @throws TimeoutException
      * @throws ServerError
      */
     void signUp(Role role, String firstName, String lastName, String email, String organization,
-                String password, String phone, boolean eulaAccepted)
+                String password, String phone, boolean eulaAccepted, Response.Listener<JSONObject> successListener,
+                Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException, ServerError;
 
     /**
@@ -62,11 +82,32 @@ public interface UserApi {
      *
      * @param username
      * @param password
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "id": String (UUID),
+     *         "username": String,
+     *         "email": String,
+     *         "firstName": String,
+     *         "lastName": String,
+     *         "organization": String,
+     *         "phone": String,
+     *         "admin": boolean,
+     *         "status": String,
+     *         "eulaAccepted": boolean
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      * @throws InterruptedException
      * @throws ExecutionException
      * @throws TimeoutException
      */
-    void requestProfile(String username, String password)
+    void requestProfile(String username, String password, Response.Listener<JSONObject> successListener,
+                        Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException;
 
     /**
@@ -74,19 +115,29 @@ public interface UserApi {
      *
      * @param username
      * @param password
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "id": String (UUID),
+     *         "type": String,
+     *         "name": String,
+     *         "entityId": String (UUID),
+     *         "accountId": String (UUID),
+     *         "userId": String (UUID)
+     *     }
+     *
+     * }</pre>
+     *
+     * @param errorListener handles a possible exception during the request
      * @throws InterruptedException
      * @throws ExecutionException
      * @throws TimeoutException
      */
-    void requestRole(String username, String password)
+    void requestRole(String username, String password, Response.Listener<JSONObject> successListener,
+                     Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException;
-
-    /**
-     * Get the listener that handles the request response.
-     *
-     * @return
-     */
-    UserApiResponseHandler getUserApiResponseHandler();
 
 }
 

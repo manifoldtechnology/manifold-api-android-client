@@ -29,44 +29,72 @@ package com.manifoldtechnology.manifold_api_android_client;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
+import com.android.volley.Response;
 import com.manifoldtechnology.manifold_api_android_client.api.ticker.LiveTickerApi;
 import com.manifoldtechnology.manifold_api_android_client.api.ticker.LiveTickerApiImpl;
-import com.manifoldtechnology.manifold_api_android_client.api.ticker.LiveTickerApiResponseHandler;
+import com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.defaultErrorListener;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncResponseReceived;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getAsyncTestSuccessful;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getContext;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.getManifoldApiConnector;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.handleException;
+import static com.manifoldtechnology.manifold_api_android_client.rules.SignUpTestRule.waitForAsyncResponse;
+import static junit.framework.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
-public class LiveTickerApiTest extends ApiTest implements LiveTickerApiResponseHandler {
+public class LiveTickerApiTest {
+
+    @ClassRule
+    public static SignUpTestRule apiTestRule = new SignUpTestRule();
 
     private LiveTickerApi liveTickerApi;
     private DateFormat sdf = new SimpleDateFormat("yyyyMMdd.HHmmss.SSS");
 
     @Before
     public void beforeTest(){
-        liveTickerApi = new LiveTickerApiImpl(getContext(), this, getManifoldApiConnector());
+        liveTickerApi = new LiveTickerApiImpl(getContext(), getManifoldApiConnector());
     }
 
     @Test
     public void testGetLiveTicker() throws InterruptedException {
         List<String> entries = new ArrayList<>();
         entries.add("TSLA");
-        liveTickerApi.getLiveTicker(entries);
+        liveTickerApi.getLiveTicker(entries, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("response", "getLiveTicker: " + response.toString());
+
+                assertTrue(response.has("array"));
+
+                try {
+                    if (response.getJSONArray("array").length() > 0) {
+                        for(String attribute : Arrays.asList("symbol", "price", "change")) {
+                            response.getJSONArray("array").getJSONObject(0).has(attribute);
+                        }
+                    }
+
+                    getAsyncTestSuccessful().set(true);
+                    getAsyncResponseReceived().set(true);
+                } catch (JSONException e) {
+                    handleException(e);
+                }
+            }
+        }, defaultErrorListener());
         waitForAsyncResponse();
-    }
-
-    @Override
-    public void handleLiveTickerResponse(JSONObject result) {
-        Log.d("liveTickerResponse", result.toString());
-
-        getAsyncTestSuccessful().set(true);
-        getAsyncResponseReceived().set(true);
     }
 }

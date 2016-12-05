@@ -24,35 +24,32 @@
  * SOFTWARE.
  */
 
-package com.manifoldtechnology.manifold_api_android_client.api.assets;
+package com.manifoldtechnology.manifold_api_android_client.api;
 
-import com.manifoldtechnology.manifold_api_android_client.api.ManifoldApiResponseHandler;
+import android.content.Context;
 
-import org.json.JSONObject;
+import com.manifoldtechnology.manifold_api_android_client.domain.ManifoldApiConnector;
 
 /**
- * Provides a handler for the <code>JSONObject</code> responses associated with the <code>AssetsApi</code>.
+ * Holds values shared by all of the different API implementations.
  */
-public interface AssetsApiResponseHandler extends ManifoldApiResponseHandler {
+public abstract class AbstractApi implements Api {
 
-    /**
-     * Receives a <code>JSONObject</code> response and handles it as needed in the view.
-     *
-     * @param response A <code>JSONObject</code> in the following format:
-     * <pre>{@code
-     *
-     *     {
-     *         "results": [{
-     *             "type": String,
-     *             "id": String (UUID),
-     *             "ticker": String,
-     *             "amount": String (decimal),
-     *             "issuer": String (UUID)
-     *         }]
-     *     }
-     *
-     * }</pre>
-     */
-    void handleAssetsResponse(JSONObject response);
+    private ManifoldApiConnector connector;
+    private Context context;
 
+    public AbstractApi(Context context, ManifoldApiConnector connector){
+        this.context = context;
+        this.connector = connector;
+    }
+
+    @Override
+    public Context getContext(){
+        return context;
+    }
+
+    @Override
+    public ManifoldApiConnector getConnector(){
+        return connector;
+    }
 }
