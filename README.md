@@ -69,6 +69,11 @@ Identify the `ownerId`, which is a `UUID` available from `UserApi.requestRole`:
 
 Submit an arbitrary JSON event:
 
+    JSONObject json = new JSONObject();
+    json.put("type", "CurrentTime");
+    json.put("data", new JSONObject());
+    json.getJSONObject("data").put("time", new Date().getTime());
+    
     eventsApi.submitEventRequest(ownerId, json, getEventResponseListener(), defaultErrorListener());
 
 From the success callback, submit another request to view the last block summary in the blockchain:
