@@ -90,14 +90,15 @@ public class EventsApiTest {
 
                 assertTrue(response.has("array"));
 
-                List<String> items = Arrays.asList("addUsersToGroup", "attachRole", "bindOffer", "cancelAsk",
-                        "cancelBid", "changePassword", "completeContract", "completeOffer", "createAccount", "createAsk",
-                        "createAsset", "createBid", "createEntity", "createGroup", "createLink", "createOffer",
-                        "createPermission", "createRole", "createStock", "createUser", "deactivateUser",
-                        "deleteAccount", "deleteAsset", "deleteEntity", "deleteGroup", "deleteLink",
-                        "deletePermission", "deleteUser", "grantAccess", "reactivateUser", "removeUsersFromGroup",
-                        "revokeAccess", "signupRole", "transfer", "updateAccount", "updateAsset", "updateEntity",
-                        "updateGroup", "updatePrice", "updateRole", "updateUser");
+                List<String> items = Arrays.asList("addUsersToGroup", "attachRole", "bindOffer", "buyAsset",
+                        "cancelAsk", "cancelBid", "changePassword", "completeContract", "completeOffer",
+                        "createAccount", "createAsk", "createAsset", "createBid", "createEntity", "createGroup",
+                        "createLink", "createOffer", "createPermission", "createRole", "createStock",
+                        "createUser", "deactivateUser", "deleteAccount", "deleteAsset", "deleteEntity",
+                        "deleteGroup", "deleteLink", "deletePermission", "deleteUser", "grantAccess", "offerAsset",
+                        "reactivateUser", "removeUsersFromGroup", "retractAsset", "revokeAccess", "signupRole",
+                        "transfer", "updateAccount", "updateAsset", "updateEntity", "updateGroup", "updatePrice",
+                        "updateRole", "updateUser");
 
                 try {
                     JSONArray array = response.getJSONArray("array");
