@@ -19,7 +19,7 @@ Manifold Technology API Client Library for Android
 **Step 2**. Add the dependency
 
     dependencies {
-        compile 'com.github.manifoldtechnology:manifold-api-android-client:v1.1.1'
+        compile 'com.github.manifoldtechnology:manifold-api-android-client:v1.1.2'
     }
     
 ### maven
@@ -38,7 +38,7 @@ Manifold Technology API Client Library for Android
     <dependency>
         <groupId>com.github.manifoldtechnology</groupId>
         <artifactId>manifold-api-android-client</artifactId>
-        <version>v1.1.1</version>
+        <version>v1.1.2</version>
     </dependency>
     
 ## Usage Example
