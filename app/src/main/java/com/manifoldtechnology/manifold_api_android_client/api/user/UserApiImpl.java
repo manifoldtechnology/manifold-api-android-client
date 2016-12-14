@@ -113,4 +113,19 @@ public class UserApiImpl extends AbstractApi implements UserApi {
         RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
     }
 
+    @Override
+    public void deleteUser(String username, String password, String userId, Response.Listener<JSONObject> successListener,
+                           Response.ErrorListener errorListener) {
+
+        String url = Utilities.getUrlRoot(getConnector())
+                .appendPath("users")
+                .appendPath(userId)
+                .build().toString();
+
+        JsonObjectRequestBasicAuth request = new JsonObjectRequestBasicAuth(Request.Method.DELETE, url,
+                username, password, null, JsonObjectRequestBasicAuth.Type.STRING, successListener, errorListener);
+
+        RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(request);
+    }
+
 }

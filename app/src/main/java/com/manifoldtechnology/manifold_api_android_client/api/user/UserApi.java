@@ -139,5 +139,24 @@ public interface UserApi {
                      Response.ErrorListener errorListener)
             throws InterruptedException, ExecutionException, TimeoutException;
 
+    /**
+     * Delete a user that has been created with the signUp method.
+     *
+     * @param username
+     * @param password
+     * @param userId a UUID received from the requestRole method
+     * @param successListener handles a <code>JSONObject</code> in the following format:
+     *
+     * <pre>{@code
+     *
+     *     {
+     *         "result": String (UUID), event ID
+     *     }
+     *
+     * }</pre>
+     * @param errorListener handles a possible exception during the request
+     */
+    void deleteUser(String username, String password, String userId, Response.Listener<JSONObject> successListener,
+                    Response.ErrorListener errorListener);
 }
 

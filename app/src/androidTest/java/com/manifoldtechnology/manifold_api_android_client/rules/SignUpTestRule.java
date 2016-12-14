@@ -75,6 +75,7 @@ public class SignUpTestRule implements TestRule {
     private static String phone = "(111) 111-1111";
     private static boolean eulaAccepted = true;
     private static String roleId;
+    private static String userId;
 
     private static ManifoldApiConnector connector;
     private static DateFormat sdf = new SimpleDateFormat("yyyyMMdd.HHmmss.SSS");
@@ -84,6 +85,7 @@ public class SignUpTestRule implements TestRule {
     @Override
     public Statement apply(final Statement base, Description description) {
         return new Statement() {
+
             @Override
             public void evaluate() throws Throwable {
                 // Before
@@ -109,12 +111,24 @@ public class SignUpTestRule implements TestRule {
 
                 try{
                     base.evaluate();
-                } finally{
-                    getAsyncResponseReceived().set(false);
-                    getAsyncTestSuccessful().set(false);
-                    // After
-                    // userApi.deleteUser();
                 }
+                finally {
+                    asyncResponseReceived.set(false);
+                    asyncTestSuccessful.set(false);
+                    userApi.deleteUser(email, password, userId, deleteUserResponseListener(), defaultErrorListener());
+                    waitForAsyncResponse();
+                }
+            }
+        };
+    }
+
+    private static Response.Listener<JSONObject> deleteUserResponseListener(){
+        return new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("response", "deleteUser: " + response.toString());
+                asyncResponseReceived.set(true);
+                asyncTestSuccessful.set(true);
             }
         };
     }
@@ -128,8 +142,12 @@ public class SignUpTestRule implements TestRule {
                     connector = new ManifoldApiConnector(connector.getProtocol(), connector.getHost(),
                             connector.getPort(), connector.getPath(), connector.getVersion(), email, password);
 
+                    userId = response.getString("userId");
+
                     userApi.requestProfile(email, password, requestProfileResponseListener(), defaultErrorListener());
                 } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }

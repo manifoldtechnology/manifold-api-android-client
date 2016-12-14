@@ -106,7 +106,7 @@ private Response.Listener<JSONObject> getEventResponseListener(){
 
 The response shows the last block in the blockchain with the most recently submitted event:
 
-```javascript
+```json
 {
      "ownerId": "e37aa970-bbcf-11e6-a450-5fdf90e45bcd",
      "chainId": "e37aa970-bbcf-11e6-a450-5fdf90e45bcd",

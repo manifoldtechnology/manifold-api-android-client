@@ -84,22 +84,24 @@ public class HistoryApiTest {
                             }
 
                             if (response.getJSONArray("results").length() > 0) {
-                                for(String attribute : Arrays.asList("submitted", "accepted", "from", "to", "asset")){
+                                for (String attribute : Arrays.asList("submitted", "accepted", "from", "to", "asset")) {
                                     assertTrue(response.getJSONArray("results").getJSONObject(0).has(attribute));
                                 }
-                            }
 
-                            JSONObject objectZero = response.getJSONArray("results").getJSONObject(0);
+                                JSONObject objectZero = response.getJSONArray("results").getJSONObject(0);
 
-                            for(String attribute : Arrays.asList("id", "type", "name", "entityId", "accountId", "userId")){
-                                if(!objectZero.isNull("to")) {
-                                    assertTrue(objectZero.getJSONObject("to").has(attribute));
+                                for (String attribute : Arrays.asList("id", "type", "name", "entityId", "accountId", "userId")) {
+                                    if (!objectZero.isNull("to")) {
+                                        assertTrue(objectZero.getJSONObject("to").has(attribute));
+                                    }
+                                    if (!objectZero.isNull("from")) {
+                                        assertTrue(objectZero.getJSONObject("from").has(attribute));
+                                    }
                                 }
-                                assertTrue(objectZero.getJSONObject("from").has(attribute));
-                            }
 
-                            for(String attribute : Arrays.asList("id", "type", "ticker", "amount", "issuer", "metadata")){
-                                assertTrue(objectZero.getJSONObject("asset").has(attribute));
+                                for (String attribute : Arrays.asList("id", "type", "ticker", "amount", "issuer", "metadata")) {
+                                    assertTrue(objectZero.getJSONObject("asset").has(attribute));
+                                }
                             }
 
                             getAsyncTestSuccessful().set(true);
