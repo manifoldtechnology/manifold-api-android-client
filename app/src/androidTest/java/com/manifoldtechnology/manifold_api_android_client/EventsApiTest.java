@@ -93,11 +93,12 @@ public class EventsApiTest {
                 List<String> items = Arrays.asList("addUsersToGroup", "attachRole", "bindOffer", "buyAsset",
                         "cancelAsk", "cancelBid", "changePassword", "completeContract", "completeOffer",
                         "createAccount", "createAsk", "createAsset", "createBid", "createEntity", "createGroup",
-                        "createLink", "createOffer", "createPermission", "createRole", "createStock",
-                        "createUser", "deactivateUser", "deleteAccount", "deleteAsset", "deleteEntity",
-                        "deleteGroup", "deleteLink", "deletePermission", "deleteUser", "grantAccess", "offerAsset",
-                        "reactivateUser", "removeUsersFromGroup", "retractAsset", "revokeAccess", "signupRole",
-                        "transfer", "updateAccount", "updateAsset", "updateEntity", "updateGroup", "updatePrice",
+                        "createLink", "createNotification", "createOffer", "createPermission", "createRole",
+                        "createStock","createUser", "deactivateUser", "deleteAccount", "deleteAllNotifications",
+                        "deleteAsset", "deleteEntity", "deleteGroup", "deleteLink", "deleteNotification",
+                        "deletePermission", "deleteUser", "grantAccess", "offerAsset", "reactivateUser",
+                        "removeUsersFromGroup", "retractAsset", "revokeAccess", "signupRole", "transfer",
+                        "updateAccount", "updateAsset", "updateEntity", "updateGroup", "updatePrice",
                         "updateRole", "updateUser");
 
                 try {
